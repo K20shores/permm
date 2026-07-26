@@ -585,8 +585,8 @@ class Mechanism(object):
             reactions = reactions + ['+'.join(t2) for t2 in combine]
         aslice = kwds.get('slice', slice(None))
         reactions = [ (abs(self('(%s)' % (rxn))[aslice].get_spc(plot_spc, float64(0.))).sum(),rxn) for rxn in reactions]
-    
-        reactions.sort(reverse = True)
+
+        reactions.sort(key = lambda vr: vr[0], reverse = True)
 
         reactions = [r for v,r in reactions]
         if len(reactions) > nlines:
@@ -597,9 +597,13 @@ class Mechanism(object):
                     other = self('(%s)' % (rxn,))
         
             reactions = [self('(%s)' % (rxn, )) for rxn in reactions[:nlines-1]] + [other]
+        else:
+            # Fewer reactions than nlines: no reactions are combined, but the
+            # names still need to be evaluated to reaction objects before .sum().
+            reactions = [self('(%s)' % (rxn, )) for rxn in reactions]
         reactions = [(rxn.sum()[plot_spc], rxn) for rxn in reactions]
-    
-        reactions.sort(reverse = False)
+
+        reactions.sort(key = lambda vr: vr[0], reverse = False)
 
         reactions = [r for v,r in reactions]
         
