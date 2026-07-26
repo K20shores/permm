@@ -68,7 +68,7 @@ class Mechanism(object):
         from io import StringIO
         if verbose > 0:
             print(spctxt)
-        spcdict = yaml.load(StringIO(spctxt))
+        spcdict = yaml.load(StringIO(spctxt), Loader=yaml.FullLoader)
         return cls(spcdict)
 
     @classmethod
@@ -95,7 +95,7 @@ class Mechanism(object):
         from io import StringIO
         if verbose > 0:
             print(rxntxt)
-        rxndict = yaml.load(StringIO(rxntxt))
+        rxndict = yaml.load(StringIO(rxntxt), Loader=yaml.FullLoader)
         return cls(rxndict)
         
     def __init__(self, yaml_path):
@@ -115,9 +115,10 @@ class Mechanism(object):
         import os
         if isinstance(yaml_path,str):
             if os.path.exists(yaml_path):
-                yaml_file = yaml.load(open(yaml_path))
+                with open(yaml_path) as yaml_stream:
+                    yaml_file = yaml.load(yaml_stream, Loader=yaml.FullLoader)
             else:
-                yaml_file = yaml.load(yaml_path)
+                yaml_file = yaml.load(yaml_path, Loader=yaml.FullLoader)
         elif isinstance(yaml_path,dict):
             yaml_file = yaml_path
         

@@ -12,9 +12,9 @@ from datetime import datetime, timedelta
 from permm.netcdf import NetCDFFile
 from PseudoNetCDF.sci_var import PseudoNetCDFFile
 from numpy import array, concatenate, zeros, arange, ceil, concatenate, diff
-from pylab import figure, title as pylabtitle, plot_date, savefig, legend, axis, twinx, rcParams
+from pylab import figure, title as pylabtitle, savefig, legend, axis, twinx, rcParams
 from matplotlib.dates import DateFormatter, date2num
-from matplotlib.cm import get_cmap
+from matplotlib import colormaps
 from matplotlib.font_manager import FontProperties
 import re
 import operator
@@ -75,7 +75,7 @@ def plot(mech, y, stepped = True, end_date = True, figure_settings = {}, axis_se
     fig = figure(**figure_settings)
     ax = fig.add_subplot(111, **axis_settings)
     
-    ax.plot_date(date_objs, y, **line_settings)
+    ax.plot(date_objs, y, **line_settings)
     ax.xaxis.set_major_formatter(DateFormatter('%jT%H'))
     fig.autofmt_xdate()
 
@@ -128,7 +128,7 @@ def irr_plot(
 
     title_str = none_defaults_to(title, title_str)
     
-    colors = iter(get_cmap(cmap)(arange(nlines, dtype = 'f')/(nlines-1)))
+    colors = iter(colormaps[cmap](arange(nlines, dtype = 'f')/(nlines-1)))
     if fig is None:
         fig = figure(**figure_settings)
         legend_line_height = .037
@@ -152,7 +152,7 @@ def irr_plot(
         reaction_label = rxn.display(digits = None)
         options['label'] = reaction_label
         if rcParams['text.usetex']: options['label'] = '\ce{' + options['label'] + '}'
-        ax.plot_date(date_objs, data[slice].repeat(2,0), **options)
+        ax.plot(date_objs, data[slice].repeat(2,0), **options)
 
     if chem is not None:
         options['color'] = 'black'
@@ -169,7 +169,7 @@ def irr_plot(
                 reactants = species
             data = mech.make_net_rxn(reactants, products, logical_and = False, reaction_type = 'kjun')[species][slice]
     
-        ax.plot_date(date_objs, data.repeat(2,0) * factor, **options)
+        ax.plot(date_objs, data.repeat(2,0) * factor, **options)
 
     ax.set_xlabel('Time')
     ax.set_ylabel(units)
@@ -237,7 +237,7 @@ def phy_plot(mech, species, init = 'INIT', final = 'FCONC', factor = 1, end_date
         processes = dict([(k,{}) for k in processes])
 
     nlines = len(processes)
-    colors = iter(get_cmap(cmap)(arange(nlines, dtype = 'f')/(nlines-1)))
+    colors = iter(colormaps[cmap](arange(nlines, dtype = 'f')/(nlines-1)))
     
     date_objs = get_date_steps(mech.mrg, end_date)
     
@@ -275,7 +275,7 @@ def phy_plot(mech, species, init = 'INIT', final = 'FCONC', factor = 1, end_date
         init_vals = mech('%s'  % (init,))[species]
         fconc_vals = mech('%s'  % (final,))[species]
         data = concatenate([init_vals[..., :1], fconc_vals[...]], axis = -1) * factor
-        tax.plot_date(get_dates(mech.mrg), data, **options)
+        tax.plot(get_dates(mech.mrg), data, **options)
     units = kwds.get('units', None)
     for process in list(processes.keys()):
         options = processes[process]
@@ -292,7 +292,7 @@ def phy_plot(mech, species, init = 'INIT', final = 'FCONC', factor = 1, end_date
         units = units or var.get_units(species)
         data = var[species].repeat(2,0) * factor
         if data.nonzero()[0].any() or not filter:
-            ax.plot_date(date_objs, data, **options)
+            ax.plot(date_objs, data, **options)
             
     if ax.get_xlabel() == '':
         ax.set_xlabel('Time')
@@ -396,7 +396,7 @@ class TestPlots(unittest.TestCase):
         fig.savefig(tf)
         tf.seek(0,0)
         tfdata = tf.read()
-        testdata = file('testdata/test1.png').read()
+        testdata = open('testdata/test1.png', 'rb').read()
         import pdb; pdb.set_trace()
         self.assertTrue(tfdata == testdata)
 

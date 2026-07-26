@@ -1,2 +1,0 @@
-recursive-include src *.yaml *.py
-recursive-include src/testdata *

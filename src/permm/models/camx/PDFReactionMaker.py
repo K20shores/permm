@@ -8,7 +8,7 @@ from Mechanism import Mechanism
 reaction_pattern = re.compile("^(?P<r_num>\d{1,3})\s(?P<reactants>[A-Z]\w{0,3}(\s\+\s[A-Z]\w{0,3})*)\s\n?(?P<products>(\d(\.(\d{1,3}(E\d{2})?)?)?\s)?[A-Z]\w{0,3}(\s\n?(\+|\-)\n?\s\n?(\d(\.(\d{1,3}(E\d{2})?)?)?\s\n?)?[A-Z]\w{0,3})*)?\s\n?(?P<reaction_type>Photolysis|(\d\.\d{3}E[+-]\d{2}))",re.M)
 
 species_pattern = re.compile("(\s?\n?(?P<sign>[+-])?\s?\n?)?(?P<stoic>\d(\.(\d{1,3}(E\d{2})?)?)?\s\n?)?(?P<name>[A-Z]\w{0,3})\s?",re.M)
-reactions_text = file("../../mechanisms/cb05_camx/cb05_camx_pdf.txt","r").read()
+reactions_text = open("../../mechanisms/cb05_camx/cb05_camx_pdf.txt","r").read()
 
 reaction_list = [match.groupdict() for match in reaction_pattern.finditer(reactions_text)]
 
@@ -98,12 +98,13 @@ for ri,rxn in enumerate(reaction_list):
 initial_yaml = '---\n' + \
                species_yaml + '\n' +  \
                reaction_yaml + '\n' + \
-               file('../../mechanisms/cb05_camx/cb05_camx_new_groups.yaml').read() + '\n...'
+               open('../../mechanisms/cb05_camx/cb05_camx_new_groups.yaml').read() + '\n...'
 
-print(initial_yaml, file=file('../../mechanisms/cb05_camx/cb05_camx.yaml','wb'))
+print(initial_yaml, file=open('../../mechanisms/cb05_camx/cb05_camx.yaml','w'))
 initial_mech = Mechanism(initial_yaml)
 globals().update(initial_mech.species_dict)
-net_reaction_rules=yaml.load(file('../../rules.yaml'))
+with open('../../rules.yaml') as _rules_file:
+    net_reaction_rules = yaml.load(_rules_file, Loader=yaml.FullLoader)
 net_reaction_yaml='\n'
 net_reaction_yaml='net_reaction_list:\n'
 
@@ -125,9 +126,9 @@ full_yaml = '---\n' + \
                species_yaml + '\n' +  \
                reaction_yaml + '\n' + \
                net_reaction_yaml + '\n' + \
-               file('../../mechanisms/cb05_camx/cb05_camx_new_groups.yaml').read() + '\n' + \
-               file('camx_netphysical26.yaml').read() + '\n...'
+               open('../../mechanisms/cb05_camx/cb05_camx_new_groups.yaml').read() + '\n' + \
+               open('camx_netphysical26.yaml').read() + '\n...'
                
 # + '\n' + \
-#               file('diagram.yaml').read()
+#               open('diagram.yaml').read()
 print(full_yaml)

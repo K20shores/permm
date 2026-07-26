@@ -18,7 +18,8 @@ else:
         from os.path import join,abspath,dirname
         import sys
         cmaq_template_path = join(abspath(dirname(__file__)),'defaults','template.yaml')       
-        print(file(cmaq_template_path,'r').read(), file=sys.stdout)
+        with open(cmaq_template_path, 'r') as _tmpl:
+            print(_tmpl.read(), file=sys.stdout)
         parser.exit()
     if len(args)<1:
         parser.error(msg="Requires a yaml file as an argument.  For a template use the -t option.  The template will be output to the stdout.")
@@ -26,7 +27,8 @@ else:
     else:
         import yaml
         from permm.graphing.timeseries import phy_plots, chem_plots, rxn_plots
-        conf = yaml.load(file(args[0]))
+        with open(args[0]) as _conf_file:
+            conf = yaml.load(_conf_file, Loader=yaml.FullLoader)
         phy_plots(conf)
         chem_plots(conf)
         rxn_plots(conf)

@@ -1,5 +1,5 @@
 
-from yaml import load
+from yaml import load, FullLoader
 from glob import glob
 from os.path import basename, abspath, dirname, join
 from collections import defaultdict
@@ -7,7 +7,8 @@ from collections import defaultdict
 from permm.core.Mechanism import Mechanism
 _mechanisms_dir = abspath(dirname(__file__))
 
-atoms = load(open(join(_mechanisms_dir, 'atoms.yaml')))
+with open(join(_mechanisms_dir, 'atoms.yaml')) as _atoms_file:
+    atoms = load(_atoms_file, Loader=FullLoader)
 
 class _mech_fromkey(defaultdict):
     def __init__(self):

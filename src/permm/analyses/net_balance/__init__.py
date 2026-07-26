@@ -34,13 +34,13 @@ def net_balance(mechanism, mrg_data_path, output_dir):
     mrg_file = NetCDFFile(mrg_data_path, 'r')
     mech.set_mrg(mrg_file)
 
-    print(SumTable(mech), file=file(net_data_path+'sum','wb'))
-    print(NetTables(mech), file=file(net_data_path+'net','wb'))
-    print(PhyTables(mech), file=file(net_data_path+'phy','wb'))
-    print(VOCTable(mech), file=file(net_data_path+'voc','wb'))
-    print(PtbTable(mech), file=file(net_data_path+'ptb','wb'))
+    print(SumTable(mech), file=open(net_data_path+'sum','w'))
+    print(NetTables(mech), file=open(net_data_path+'net','w'))
+    print(PhyTables(mech), file=open(net_data_path+'phy','w'))
+    print(VOCTable(mech), file=open(net_data_path+'voc','w'))
+    print(PtbTable(mech), file=open(net_data_path+'ptb','w'))
     mech = get_pure_mech(mechanism)
     mech.set_mrg(mrg_file)
 
     
-    print(IRRTable(mech), file=file(net_data_path+'irr','wb'))
+    print(IRRTable(mech), file=open(net_data_path+'irr','w'))
