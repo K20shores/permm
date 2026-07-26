@@ -10,11 +10,14 @@ __version__ = RevisionNum
 from warnings import warn
 from datetime import datetime, timedelta
 from permm.netcdf import NetCDFFile
-from PseudoNetCDF.sci_var import PseudoNetCDFFile
+try:
+    from PseudoNetCDF.sci_var import PseudoNetCDFFile
+except ImportError:  # PseudoNetCDF is optional
+    PseudoNetCDFFile = None
 from numpy import array, concatenate, zeros, arange, ceil, concatenate, diff
 from pylab import figure, title as pylabtitle, savefig, legend, axis, twinx, rcParams
 from matplotlib.dates import DateFormatter, date2num
-from matplotlib import colormaps
+from matplotlib.pyplot import get_cmap
 from matplotlib.font_manager import FontProperties
 import re
 import operator
@@ -128,7 +131,7 @@ def irr_plot(
 
     title_str = none_defaults_to(title, title_str)
     
-    colors = iter(colormaps[cmap](arange(nlines, dtype = 'f')/(nlines-1)))
+    colors = iter(get_cmap(cmap)(arange(nlines, dtype = 'f')/(nlines-1)))
     if fig is None:
         fig = figure(**figure_settings)
         legend_line_height = .037
@@ -237,7 +240,7 @@ def phy_plot(mech, species, init = 'INIT', final = 'FCONC', factor = 1, end_date
         processes = dict([(k,{}) for k in processes])
 
     nlines = len(processes)
-    colors = iter(colormaps[cmap](arange(nlines, dtype = 'f')/(nlines-1)))
+    colors = iter(get_cmap(cmap)(arange(nlines, dtype = 'f')/(nlines-1)))
     
     date_objs = get_date_steps(mech.mrg, end_date)
     
@@ -327,7 +330,7 @@ def _add_mech(conf):
     else:
         from permm import get_pure_mech
         mech = conf['mech'] = get_pure_mech('_'.join([conf['mechanism'].lower(), conf['model'].lower()]))
-        if isinstance(conf['mrgfile'], PseudoNetCDFFile):
+        if PseudoNetCDFFile is not None and isinstance(conf['mrgfile'], PseudoNetCDFFile):
             mrg_file = conf['mrgfile']
         else:
             mrg_file = NetCDFFile(conf['mrgfile'],'r')

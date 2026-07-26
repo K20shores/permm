@@ -6,7 +6,10 @@ import sys
 from numpy import * # Explicitly using dtype, array and ndarray; providing all default numpy to __call__interface
 from warnings import warn
 
-from PseudoNetCDF.sci_var import PseudoNetCDFVariable
+try:
+    from PseudoNetCDF.sci_var import PseudoNetCDFVariable
+except ImportError:  # PseudoNetCDF is optional
+    PseudoNetCDFVariable = None
 
 from .Species import Species, species_sum
 from .Reaction import Reaction
@@ -577,7 +580,7 @@ class Mechanism(object):
 
         reactions1 = reactions
         reactions = [ rxn for rxn in reactions if rxn not in reduce(operator.add, combine) ]
-        nlines = min(nlines, len(reactions)+1)
+        nlines = nlines if nlines < len(reactions) + 1 else len(reactions) + 1
         if combine != [()] and reactions != reactions1:
             reactions = reactions + ['+'.join(t2) for t2 in combine]
         aslice = kwds.get('slice', slice(None))
@@ -657,6 +660,9 @@ class Mechanism(object):
         if not irr is None:
             irr_type = dtype(dict(names = ReactionNames, formats = irr[:].dtype.char*len(ReactionNames)))
                 
+            if PseudoNetCDFVariable is None:
+                raise ImportError("Reading a merged 'IRR' array needs PseudoNetCDF (pip install 'permm[pseudonetcdf]'); "
+                                  "pass per-reaction variables (e.g. a netCDF4.Dataset) instead.")
             self.irr = irr[:].view(dtype = irr_type).squeeze().view(type = PseudoNetCDFVariable)
             self.irr.units = irr.units
 
@@ -675,7 +681,7 @@ class Mechanism(object):
                     warn("IRR does not contain %s: skipped." % rxn_name)
             else:
                 try:
-                    self.irr_dict[rxn_name] = rxn * self.mrg.variables[rxn_name][:].view(type = PseudoNetCDFVariable).view(ndarray)
+                    self.irr_dict[rxn_name] = rxn * asarray(self.mrg.variables[rxn_name][:])
                 except (KeyError, ValueError) as xxx_todo_changeme1:
                     (e) = xxx_todo_changeme1
                     warn("IRR does not contain %s: skipped." % rxn_name)
@@ -712,7 +718,7 @@ class Mechanism(object):
             if processes is None:
                 raise ValueError("When ipr is a dictionary, processes must be provided as a list of process names")
             self.process_dict = Processes_ProcDelimSpcDict(processes, self.mrg.variables)
-        elif isinstance(ipr, (PseudoNetCDFVariable, NetCDFVariable)):
+        elif isinstance(ipr, tuple(_t for _t in (PseudoNetCDFVariable, NetCDFVariable) if _t is not None)):
             self.process_dict = {}
             for pi, prc in enumerate(processes):
                 self.process_dict[prc] = Process(prc, default_unit = getattr(ipr, 'units', 'Unknown'), **dict([(spc, ipr[si, pi]) for si, spc in enumerate(species)]))

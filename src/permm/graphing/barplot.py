@@ -2,7 +2,7 @@ __all__ = ['profile_process']
 
 from warnings import warn
 from pylab import figure, title, bar, savefig, legend, grid, xlabel, ylabel, xticks, axis
-from matplotlib import colormaps
+from matplotlib.pyplot import get_cmap
 from matplotlib.colors import rgb2hex
 from numpy import arange, ndarray
 
@@ -47,7 +47,7 @@ def profile_process(mech, species_group, process, loc = 1, width = .8, sort = Fa
 
     # The number of patches is based on the number of components
     nbars = len(vals)
-    colors = iter(colormaps[cmap](arange(nbars, dtype = 'f')/(nbars-1)))
+    colors = iter(get_cmap(cmap)(arange(nbars, dtype = 'f')/(nbars-1)))
 
     # Normalize to 100% if requested
     if normalize:

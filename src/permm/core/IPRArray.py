@@ -10,7 +10,10 @@ from numpy import ndarray, \
                   rollaxis, \
                   arange
 
-from PseudoNetCDF.sci_var import PseudoNetCDFVariable
+try:
+    from PseudoNetCDF.sci_var import PseudoNetCDFVariable
+except ImportError:  # PseudoNetCDF is optional
+    PseudoNetCDFVariable = None
 
 from .Species import Species
 

@@ -15,10 +15,14 @@ dependencies = [
     "PyYAML>=5",
     "netCDF4>=1.5",
     "matplotlib>=3.5",
-    "PseudoNetCDF>=3.5",
 ]
 
 [project.optional-dependencies]
+# PseudoNetCDF pins numpy<2, which conflicts with newer stacks (e.g. musica).
+# It's only needed for merged IRR/IPR (CMAQ) files and its file readers; the
+# common path reads variables from any object with a `.variables` mapping
+# (e.g. a netCDF4.Dataset), so keep it optional.
+pseudonetcdf = ["PseudoNetCDF>=3.1"]
 gui = ["wxPython"]
 
 [project.urls]
